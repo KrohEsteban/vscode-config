@@ -13,7 +13,8 @@ vscode-config/
 │       ├── AGENTS.md           # Base skill: rules for all projects
 │       ├── skill-java-spring.md  # Java 17 / Spring Boot conventions
 │       ├── skill-go-gin.md     # Go / Gin conventions
-│       └── skill-frontend.md   # Next.js / Astro / TypeScript conventions
+│       ├── skill-frontend.md   # Next.js / Astro / TypeScript conventions
+│       └── skill-cicd.md       # CI/CD pipelines, commit format, quality gates
 └── scripts/                    # Setup/install scripts
 ```
 

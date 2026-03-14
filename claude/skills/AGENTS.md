@@ -83,3 +83,23 @@ docker compose -f .docker/compose.yaml run --rm cli <command>
 - Tests must run against real dependencies (real DB in Docker), not mocks of external infrastructure.
 - Unit tests mock only internal interfaces, not the database.
 - Test file location mirrors source structure.
+- JUnit XML output required for all CI runs.
+
+## Commit Message Format
+```
+[PROJECT-KEY-###] Description without trailing period
+```
+- No trailing period.
+- One commit per merge/pull request.
+- For MRs: `[release-type] ![MR-number] [PROJECT-KEY-###] Description`
+  - Release types: `documentation`, `major`, `minor`, `patch`, `refactor`, `security`, `tests`
+- See `skill-cicd.md` for full rules.
+
+## File Conventions (enforced by CI)
+- Line endings: **LF only** (Unix).
+- No trailing whitespace.
+- No tabs (except Makefile).
+- Files must end with a newline.
+- File permissions: **0644 only**.
+- Filenames: alphanumeric + `_/-+.` only.
+- Max line length: **120 characters** (Java: 140).
