@@ -1,4 +1,7 @@
-# Skill: Java / Spring Boot
+---
+name: java
+description: Java 17 / Spring Boot conventions: POJO, JDBC, Checkstyle, Gradle
+---
 
 ## Stack
 - Java 17, Spring Boot 3.x, Spring Web MVC, Spring Security

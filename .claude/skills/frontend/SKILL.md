@@ -1,4 +1,7 @@
-# Skill: Frontend (Next.js / Astro / TypeScript)
+---
+name: frontend
+description: Frontend conventions: Next.js App Router, Astro SSR, TypeScript, OpenAPI types
+---
 
 ## Stacks Used
 - **Next.js 16+** with TypeScript, React 19, Tailwind CSS 4 (blpdev projects)

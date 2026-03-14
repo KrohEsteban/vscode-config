@@ -1,4 +1,7 @@
-# Skill: Go / Gin
+---
+name: go
+description: Go / Gin conventions: pgx, JWT, Swaggo, Air, clean architecture
+---
 
 ## Stack
 - Go 1.23+, Gin v1.10+
