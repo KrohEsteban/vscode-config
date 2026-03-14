@@ -48,6 +48,26 @@ Examples:
 
 - **No unexpanded acronyms**: write `Api`, `Http`, `Db` — never `API`, `HTTP`, `DB`.
 
+## Internationalization (i18n)
+
+**NEVER hardcode user-facing strings directly in code.** All text shown to clients must live in a centralized messages file, separate from the logic.
+
+- Client-facing messages are in **Spanish** by default.
+- Keeping them isolated makes them easy to maintain and allows adding other languages later.
+- Reference messages by key from code — never inline the string itself.
+- Message keys use `snake_case` namespaced by domain: `appointment.not_available`, `auth.invalid_token`.
+- The messages file is the single source of truth — no duplicated strings across the codebase.
+
+```
+// ❌ hardcoded
+return error("El turno no está disponible")
+
+// ✅ centralized
+return error(messages["appointment.not_available"])
+```
+
+Each language-specific skill defines which mechanism to use (properties file, JSON, YAML, etc.).
+
 ## Code Formatting
 
 - Line endings: **LF only** (Unix). Never CRLF.
