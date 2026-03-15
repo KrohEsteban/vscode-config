@@ -24,11 +24,24 @@ Examples:
 - **No ORM**: raw SQL with parameterized queries. Explicit column mapping to data objects.
 - **Repository pattern**: one file per entity, one class/struct per repository.
 
+## Golden Rule
+
+**Imitate the existing code.** The current codebase's style takes precedence over any external guide, including this skill. Before writing new code, read the surrounding code and match its patterns — naming, structure, error handling, and formatting.
+
 ## Code Quality
 
 1. **NEVER suppress linter or test errors** — no `@SuppressWarnings`, `// eslint-disable`, `# noqa`, or similar.
 2. **Fix the root cause** — if a check fails, fix the code, not the check.
 3. If suppression is the only option, stop and ask the user before proceeding.
+4. **Fail loud** — if a function cannot fulfill its responsibility, throw an exception. Never fail silently or return a default value masking an error.
+5. **Lowest cyclomatic complexity** — minimize decision branches. Break execution as early as possible (guard clauses first).
+6. **Strict typing** — always declare explicit types. Avoid type coercion, casting, or juggling.
+7. **Visibility as closed as possible** — default to `private`, then `protected`, only `public` when necessary.
+8. **`@todo` comments** for deferred work — must be explicit about what needs to change and include a `@see` pointing to the issue tracker:
+   ```
+   // @todo: Add pagination support to this query.
+   // @see: https://github.com/org/repo/issues/123
+   ```
 
 ## Language
 
@@ -46,6 +59,11 @@ Examples:
 | File names | `kebab-case` or `snake_case` depending on language |
 
 - **No unexpanded acronyms**: write `Api`, `Http`, `Db` — never `API`, `HTTP`, `DB`.
+- **No Hungarian notation**: `users` not `userArray`, `items` not `itemList`.
+- **Plural form for collections**: `users`, `appointments`; or append `List`/`Collection` when plural is ambiguous.
+- **Model classes use singular**: `User` not `Users`, `Appointment` not `Appointments`.
+- **Methods start with a verb**: `getUser()`, `addItem()`, `removeAppointment()` — never a noun alone.
+- **Classes/interfaces use nouns only** — no verbs in class names.
 
 ## Internationalization (i18n)
 
@@ -87,8 +105,11 @@ Each language-specific skill defines which mechanism to use (properties file, JS
 
 - **No secrets in code**: never commit passwords, tokens, API keys, or PII.
 - **Runtime injection only**: secrets via environment variables or Docker secrets — never baked into images.
-- **Encryption**: use AES-256 for symmetric encryption.
+- **Symmetric encryption**: AES-256.
+- **Asymmetric encryption / signatures**: Ed25519 (SSH keys, digital signatures).
+- **Password hashing**: Bcrypt (recommended — adjustable work factor, widely supported).
 - **Parameterized queries always** — no string concatenation in SQL.
+- **Only the credential itself is sensitive** — usernames, hostnames, ports are NOT sensitive; only passwords and API secrets are.
 
 ## REST API Conventions
 
