@@ -1,19 +1,4 @@
 {
-  // --- Neovim integration ---
-  "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
-  "vscode-neovim.neovimExecutablePaths.linux": "nvim",
-  "vscode-neovim.useCtrlKeys": true,
-  "vscode-neovim.useCtrlKeysInsertMode": false,
-  "vscode-neovim.useWsl": false,
-  "vscode-neovim.neovimUseFork": true,
-  "vscode-neovim.highlightGroups.highlights": {
-    "Normal": { "background": null },
-    "Cursor": { "background": null }
-  },
-  "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
-  },
-
   // --- Editor ---
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "off",
@@ -22,9 +7,8 @@
   "editor.insertSpaces": true,
   "editor.trimAutoWhitespace": true,
   "editor.rulers": [120, 140],
-  "editor.wordBasedSuggestions": "off",
   "editor.quickSuggestions": {
-    "other": false,
+    "other": true,
     "comments": false,
     "strings": false
   },
@@ -34,6 +18,38 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": false,
+
+  // --- Java (navigation + errors only, no local execution) ---
+  "java.server.launchMode": "Standard",
+  "java.test.defaultConfig": "",
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.debug.settings.enableRunDebugCodeLens": false,
+  "java.test.editor.enableShortcuts": false,
+  "java.inlayHints.parameterNames.enabled": "literals",
+  "java.project.importOnFirstTimeStartup": "disabled",
+
+  // --- Go (navigation + errors only) ---
+  "go.testOnSave": false,
+  "go.buildOnSave": "off",
+  "go.vetOnSave": "off",
+  "go.coverOnSave": false,
+  "go.addTags": { "tags": "json", "options": "json=omitempty" },
+
+  // --- Spell checking (CSpell) ---
+  "cSpell.enabled": true,
+  "cSpell.language": "en",
+
+  // --- ESLint ---
+  "eslint.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // --- Prettier ---
+  "prettier.enable": true,
+
+  // --- Tailwind ---
+  "tailwindCSS.validate": true,
 
   // --- Window ---
   "window.commandCenter": true,

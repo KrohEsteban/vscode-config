@@ -1,0 +1,29 @@
+{
+  "recommendations": [
+    // --- Universal ---
+    "EditorConfig.EditorConfig",           // Respects .editorconfig (LF, spaces, EOF)
+    "streetsidesoftware.code-spell-checker", // CSpell inline — same tool as CI
+
+    // --- Java (navigation + errors only, builds run via Docker) ---
+    "redhat.java",                         // Language server: errors, go-to-def, hover
+    "vscjava.vscode-java-dependency",      // Project/dependency tree navigation
+    // NOT included: vscjava.vscode-java-test, vscjava.vscode-java-debug (use Docker)
+
+    // --- Go ---
+    "golang.go",                           // Official Go: errors, navigation, IntelliSense
+    // Tests and builds run via Docker — go.testOnSave and buildOnSave disabled in settings
+
+    // --- TypeScript / JavaScript ---
+    "dbaeumer.vscode-eslint",              // ESLint errors inline
+    "esbenp.prettier-vscode",              // Prettier formatting on save
+
+    // --- Astro ---
+    "astro-build.astro-vscode",            // Astro: syntax, errors, completions
+
+    // --- Tailwind CSS (used in Astro + Next.js) ---
+    "bradlc.vscode-tailwindcss",           // Class name IntelliSense and validation
+
+    // --- Git ---
+    "eamodio.gitlens"                      // Inline blame, history navigation
+  ]
+}
