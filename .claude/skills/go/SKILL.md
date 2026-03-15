@@ -132,6 +132,11 @@ func TestGetByID(t *testing.T) {
 - Generate: `docker compose -f .docker/compose.yaml run --rm cli swag init -g internal/app/app.go`
 - Frontend types regenerated from swagger.json via openapi-typescript.
 
+## Spell Checking
+- CSpell runs on all files in CI (`qa-spellcheck` job).
+- If a technical term, package name, or abbreviation is not recognized, the job fails.
+- Add unrecognized valid terms to `.cspell/project-terms.txt` — don't rename code to avoid spellcheck.
+
 ## CLI (via Docker)
 ```bash
 docker compose -f .docker/compose.yaml run --rm cli go build ./...

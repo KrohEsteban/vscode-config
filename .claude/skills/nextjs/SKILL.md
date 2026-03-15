@@ -96,6 +96,20 @@ docker compose -f .docker/compose.yaml run --rm cli-front \
   -o src/types/generated/api.schema.ts
 ```
 
+## Formatting
+- Prettier is the source of truth for code formatting — not manual rules.
+- Never manually adjust spacing or indentation; run Prettier instead.
+- CI fails if any file doesn't match Prettier's output: `npm run format:check` or `npx prettier --check .`
+
+## Lock File
+- Yarn `--immutable` is enforced in CI — `yarn.lock` must always be in sync with `package.json`.
+- After adding or updating a dependency, commit the updated `yarn.lock`.
+- Never delete or manually edit `yarn.lock`.
+
+## Spell Checking
+- CSpell runs on all files in CI (`qa-spellcheck` job).
+- Add unrecognized valid terms to `.cspell/project-terms.txt` — don't rename code to avoid spellcheck.
+
 ## CLI (via Docker)
 ```bash
 docker compose -f .docker/compose.yaml run --rm cli-front npm install
