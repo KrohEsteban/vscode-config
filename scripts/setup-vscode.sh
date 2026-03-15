@@ -13,6 +13,21 @@ print_ok()     { echo -e "  ${GREEN}✔${RESET} $1"; }
 print_warn()   { echo -e "  ${YELLOW}⚠${RESET}  $1"; }
 print_err()    { echo -e "  ${RED}✘${RESET} $1"; }
 
+# --- resolve CLI as array (handles native binary and Flatpak) ----------------
+resolve_cli() {
+    local name="$1"
+    local flatpak_id="$2"
+    if command -v "$name" &>/dev/null; then
+        echo "native"
+        return
+    fi
+    if command -v flatpak &>/dev/null && flatpak list --app 2>/dev/null | grep -q "$flatpak_id"; then
+        echo "flatpak"
+        return
+    fi
+    echo ""
+}
+
 # --- step 1: choose editor ---------------------------------------------------
 print_header "Step 1 — Editor"
 echo "  1) VSCode   (code)"
@@ -22,12 +37,30 @@ read -rp "  Choice [1-2]: " editor_choice
 
 case "$editor_choice" in
     1)
-        CLI="code"
-        SETTINGS_DIR="$HOME/.config/Code/User"
+        install_type=$(resolve_cli "code" "com.visualstudio.code")
+        if [[ "$install_type" == "native" ]]; then
+            CLI=("code")
+            SETTINGS_DIR="$HOME/.config/Code/User"
+        elif [[ "$install_type" == "flatpak" ]]; then
+            CLI=("flatpak" "run" "com.visualstudio.code")
+            SETTINGS_DIR="$HOME/.var/app/com.visualstudio.code/config/Code/User"
+        else
+            print_err "VSCode not found — not installed as native binary or Flatpak."
+            exit 1
+        fi
         ;;
     2)
-        CLI="cursor"
-        SETTINGS_DIR="$HOME/.config/Cursor/User"
+        install_type=$(resolve_cli "cursor" "com.cursor.Cursor")
+        if [[ "$install_type" == "native" ]]; then
+            CLI=("cursor")
+            SETTINGS_DIR="$HOME/.config/Cursor/User"
+        elif [[ "$install_type" == "flatpak" ]]; then
+            CLI=("flatpak" "run" "com.cursor.Cursor")
+            SETTINGS_DIR="$HOME/.var/app/com.cursor.Cursor/config/Cursor/User"
+        else
+            print_err "Cursor not found — not installed as native binary or Flatpak."
+            exit 1
+        fi
         ;;
     *)
         print_err "Invalid choice."
@@ -35,12 +68,7 @@ case "$editor_choice" in
         ;;
 esac
 
-if ! command -v "$CLI" &>/dev/null; then
-    print_err "'$CLI' command not found — make sure the editor is installed and in PATH."
-    exit 1
-fi
-
-print_ok "Editor: $CLI → $SETTINGS_DIR"
+print_ok "Editor: ${CLI[*]} → $SETTINGS_DIR"
 
 # --- step 2: install settings ------------------------------------------------
 print_header "Step 2 — User settings"
@@ -64,7 +92,7 @@ EXTENSIONS=$(grep -oP '"[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+"' "$EXTENSIONS_SRC" | t
 
 for ext in $EXTENSIONS; do
     echo -n "  Installing $ext ... "
-    if $CLI --install-extension "$ext" --force &>/dev/null; then
+    if "${CLI[@]}" --install-extension "$ext" --force &>/dev/null; then
         echo -e "${GREEN}✔${RESET}"
     else
         echo -e "${YELLOW}⚠ failed (may already be installed or unavailable)${RESET}"
