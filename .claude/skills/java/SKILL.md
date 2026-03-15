@@ -56,7 +56,24 @@ src/
 - 4 spaces indentation (no tabs).
 - Opening brace: newline for class/method declarations, end-of-line for control flow.
 - One statement per line.
+- One variable declaration per line.
+- Empty blocks forbidden — including empty catch blocks.
 - Checkstyle enforced — do not bypass.
+
+### File Header
+Every Java file must include the required license/copyright header. Checkstyle validates this — files without the header will fail the build.
+
+### Imports
+- No wildcard imports (`import java.util.*` is forbidden).
+- No unused imports.
+- No redundant imports.
+- Import order enforced by Checkstyle — use IDE auto-sort or `gradle checkstyleMain` to verify.
+- Package and import statements must be single-line (no line wrapping).
+
+### Code Complexity
+- Cyclomatic complexity is enforced by Checkstyle — keep methods simple and well-decomposed.
+- Declaration order enforced: static fields → instance fields → constructors → methods.
+- Overloaded methods must be declared consecutively.
 
 ### Null & Safety
 - Yoda conditions:
@@ -148,6 +165,12 @@ class MyServiceIntegrationTest {
     // use only when testing wiring, DB, or HTTP layer end-to-end
 }
 ```
+
+## Test Coverage
+- Minimum coverage threshold: **50%** (enforced by JaCoCo in CI — `java-test.yaml`).
+- Coverage report: `build/reports/jacoco/test/html/index.html`.
+- If the report file is missing, CI reports an error.
+- Run locally to verify: `docker compose -f .docker/compose.yaml run --rm cli gradle test jacocoTestReport`
 
 ## CLI (via Docker)
 ```bash

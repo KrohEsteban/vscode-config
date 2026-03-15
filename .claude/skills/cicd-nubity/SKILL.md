@@ -154,3 +154,43 @@ Rules:
 - One commit per PR (`qa-single-commit` enforces this)
 - PR title must match commit subject exactly
 - Branch naming: `feature/`, `bugfix/`, `hotfix/`, `release/`, `actions/changelog/`
+- Commit author email must be `@nubity.com` or `@nbty.cloud`
+
+---
+
+## Pull Request Requirements
+
+### Description table (enforced by `qa-pull-request-description`)
+
+Every PR description **must** contain this exact markdown table — the job will fail if any field is missing or has an invalid value:
+
+```markdown
+| Question          | Answer |
+|-------------------|--------|
+| Branch            | master |
+| Bug fix?          | no     |
+| New feature?      | yes    |
+| BC breaks?        | no     |
+| Deprecations?     | no     |
+| Fixed tickets     | MYPROJECT-123 |
+| License           | proprietary |
+```
+
+Field rules:
+- **Branch**: must match the PR base branch exactly.
+- **License**: must always be `proprietary` — no other value accepted.
+- **Fixed tickets**: comma-separated list of Jira tickets (`PROJECT-123`); at least one required.
+- **Bug fix / New feature / BC breaks / Deprecations**: `yes` or `no`.
+  - `master` branch: `Bug fix? = no`
+  - Release branch (`X.Y`): `Bug fix? = yes`, `New feature? = no`, `Deprecations? = no`
+
+### PR Status
+- PR must not be out of date with the base branch (`behind` or `diverged` = fail).
+- Rebase or merge base before requesting review.
+
+### JIRA Issue
+- The issue referenced in the commit title must exist in Jira.
+- **Allowed statuses**: `in progress`, `review`, `for today`.
+- **Allowed types by branch**:
+  - Feature branch: `user story`, `task`, `sub-task`
+  - Release branch: `bug`, `feature`
