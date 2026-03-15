@@ -13,8 +13,10 @@ vscode-config/
 │       ├── base/SKILL.md       # Base rules for all projects
 │       ├── java/SKILL.md       # Java 17 / Spring Boot
 │       ├── go/SKILL.md         # Go / Gin
-│       ├── frontend/SKILL.md   # Next.js / Astro / TypeScript
-│       └── cicd/SKILL.md       # CI/CD, commit format, quality gates
+│       ├── nextjs/SKILL.md     # Next.js 15+ App Router
+│       ├── astro/SKILL.md      # Astro 5+ SSR
+│       ├── cicd/SKILL.md           # CI/CD from scratch (personal projects)
+│       └── cicd-nubity/SKILL.md    # CI/CD for Nubity projects (extends dev-kit)
 └── scripts/
     └── setup-project.sh        # Interactive installer
 ```

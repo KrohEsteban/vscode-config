@@ -29,8 +29,12 @@ src/
 ### Classes & Fields
 - Manual POJOs: private fields + getters/setters. No `@Data`, no Lombok, no Records.
 - Always use `this.` to access fields and call methods.
-- Logger as instance field, initialized in constructor:
+- Logger declaration — **match whatever the project already uses**:
   ```java
+  // option A: static final (SLF4J standard, preferred for new projects)
+  private static final Logger logger = LoggerFactory.getLogger(MyClass.class);
+
+  // option B: instance field (if the existing codebase uses this, keep it)
   private Logger logger;
   public MyService(...) {
       this.logger = LoggerFactory.getLogger(MyService.class);
@@ -65,6 +69,21 @@ src/
   return null == this.data ? this.data = new Data() : this.data;
   ```
 
+### Internationalization (i18n)
+- All user-facing strings must be defined in `src/main/resources/messages.properties`.
+- Inject via Spring's `MessageSource` — never hardcode text in Java classes.
+  ```java
+  private final MessageSource messageSource;
+
+  public MyService(MessageSource messageSource) {
+      this.messageSource = messageSource;
+  }
+
+  // usage
+  this.messageSource.getMessage("appointment.not_available", null, locale);
+  ```
+- Key naming: `snake_case` namespaced by domain, matching the convention in the `base` skill.
+
 ### String Formatting
 - Prefer `.formatted()` (Java 15+):
   ```java
@@ -73,7 +92,7 @@ src/
 
 ### Exceptions
 - Custom exception hierarchy with `@ResponseStatus` annotations.
-- Broad exception signatures where needed: `throws IOException, InterruptedException, Exception`.
+- Exception signatures — **match what the project already uses**: prefer specific types (`throws IOException, InterruptedException`); use `throws Exception` only if the existing codebase does so consistently.
 - Try-with-resources for all closeable resources.
 
 ## Spring Annotations
@@ -101,11 +120,16 @@ try (PreparedStatement stmt = connection.prepareStatement(SQL);
 ```
 
 ## Testing Pattern
+
+Unit tests (no Spring context needed):
 ```java
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class MyServiceTest {
     @Mock
-    private DataSource dataSource;
+    private MyRepository repository;
+
+    @InjectMocks
+    private MyService service;
 
     @Test
     void shouldReturnEmptyWhenNoResults() {
@@ -114,6 +138,14 @@ class MyServiceTest {
         // then
         Assertions.assertEquals("expected", actual, "message".formatted(value));
     }
+}
+```
+
+Integration tests (full Spring context required):
+```java
+@SpringBootTest
+class MyServiceIntegrationTest {
+    // use only when testing wiring, DB, or HTTP layer end-to-end
 }
 ```
 

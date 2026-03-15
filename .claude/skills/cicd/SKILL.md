@@ -1,167 +1,185 @@
 ---
 name: cicd
-description: CI/CD tools inventory (dev-kit), pipeline structure, commit format, dependency and Docker standards
+description: CI/CD from scratch for personal projects: GitHub Actions setup without external dependencies
 ---
 
-## Dev-Kit Overview
+## Context
 
-All Nubity projects consume reusable CI templates from `nubity/dev-kit`.
-Source: `/home/esteban-work/project/dev-kit`
+This is a personal project — no shared CI templates to extend from. All workflow logic lives directly in this repository under `.github/workflows/`.
 
-### Including templates (GitLab)
-```yaml
-include:
-  - project: nubity/development/dev-kit
-    ref: main
-    file: templates/gitlab/ci/qa.gitlab-ci.yml
-  - project: nubity/development/dev-kit
-    ref: main
-    file: templates/gitlab/ci/java.gitlab-ci.yml
+Use the tool configurations and patterns from [nubity/dev-kit](https://github.com/nubity/dev-kit) as reference for how to configure each tool, but run them directly instead of delegating via `uses:`.
+
+---
+
+## Recommended Workflow Structure
+
+```
+.github/
+└── workflows/
+    ├── qa.yaml          # Code quality checks on every PR
+    ├── test.yaml        # Tests on every PR
+    └── release.yaml     # Create release on merge to main
 ```
 
-### Including workflows (GitHub)
+---
+
+## `qa.yaml` — Quality Assurance
+
+Runs on every pull request. Configure the tools relevant to your stack.
+
 ```yaml
+name: 'Quality Assurance'
+
+on:
+    pull_request: null
+
 jobs:
-  qa:
-    uses: nubity/dev-kit/.github/workflows/java-qa.yaml@main
-    with:
-      project-key: BLP
+    lint:
+        name: 'Lint'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            # --- YAML ---
+            - name: 'Lint YAML'
+              uses: ibiqlik/action-yamllint@v3
+              with:
+                  config_file: .yamllint.yaml
+
+            # --- Spelling ---
+            - name: 'Spell check'
+              uses: streetsidesoftware/cspell-action@v6
+              with:
+                  config: .cspell/cspell.yaml
+
+            # --- Dockerfile (if project has Docker) ---
+            - name: 'Lint Dockerfiles'
+              uses: hadolint/hadolint-action@v3.1.0
+              with:
+                  recursive: true
+                  config: .docker/.hadolint.yaml
+```
+
+### Java — add to `qa.yaml`
+```yaml
+            # --- Checkstyle ---
+            - name: 'Set up JDK'
+              uses: actions/setup-java@v4
+              with:
+                  java-version: '17'
+                  distribution: 'temurin'
+
+            - name: 'Checkstyle'
+              run: docker compose -f .docker/compose.yaml run --rm cli gradle checkstyleMain checkstyleTest
+```
+
+### Go — add to `qa.yaml`
+```yaml
+            - name: 'Set up Go'
+              uses: actions/setup-go@v5
+              with:
+                  go-version: '1.23'
+
+            - name: 'Lint'
+              uses: golangci/golangci-lint-action@v6
+```
+
+### JavaScript / TypeScript — add to `qa.yaml`
+```yaml
+            - name: 'Install dependencies'
+              run: docker compose -f .docker/compose.yaml run --rm cli npm ci
+
+            - name: 'Prettier'
+              run: docker compose -f .docker/compose.yaml run --rm cli npx prettier --check .
+
+            - name: 'ESLint'
+              run: docker compose -f .docker/compose.yaml run --rm cli npm run lint
 ```
 
 ---
 
-## Pipeline Stage Order (GitLab)
+## `test.yaml` — Tests
 
-```
-build-images → deps → build → qa → test → release → cleanup
-```
+```yaml
+name: 'Test'
 
-GitHub runs QA jobs in parallel: general QA, Docker QA, Markdown, Spelling, XML, YAML.
+on:
+    pull_request: null
+
+jobs:
+    test:
+        name: 'Test'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            # Java
+            - name: 'Run tests'
+              run: docker compose -f .docker/compose.yaml run --rm cli gradle test
+
+            # Go
+            # - run: docker compose -f .docker/compose.yaml run --rm cli go test ./...
+
+            # JS/TS
+            # - run: docker compose -f .docker/compose.yaml run --rm cli npm test -- --watchAll=false
+```
 
 ---
 
-## Commit Message Format
+## `release.yaml` — Release
 
+Creates a GitHub release from a tag when a PR is merged to `main`.
+
+```yaml
+name: 'Release'
+
+on:
+    push:
+        tags:
+            - 'v*.*.*'
+
+jobs:
+    release:
+        name: 'Release'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: 'Create GitHub Release'
+              uses: softprops/action-gh-release@v2
+              with:
+                  generate_release_notes: true
 ```
-[PROJECT-KEY-###] Description without trailing period
-```
-
-**Merge request commits:**
-```
-[release-type] ![MR-number] [PROJECT-KEY-###] Description
-```
-
-Release types: `documentation`, `major`, `minor`, `patch`, `refactor`, `security`, `tests`
-
-Special cases:
-- Merge commits: `Merge branch 'X' into Y`
-- Reverts: `Revert "..."`
-- Changelog: `Add|Update CHANGELOG.md for X.Y.Z`
-
-Rules:
-- No trailing period
-- One commit per merge request (`qa-single-commit` enforces this)
-- PR title must match commit subject exactly
-- Branch naming: `feature/`, `bugfix/`, `hotfix/`, `release/`, `actions/changelog/`
 
 ---
 
-## Tools Inventory by Language
+## Useful Reusable Actions
 
-### Universal (all projects)
-| Tool | Purpose | Config |
-|------|---------|--------|
-| **CSpell** | Spell-checking | `.cspell/cspell.yaml` + custom dictionaries |
-| **YAMLlint** | YAML validation | `.yamllint.yaml` |
-| **Markdownlint** | Markdown validation | `.markdownlint.yaml` |
-| **XMLlint** | XML formatting | `make lint-xml` |
-| **Hadolint** | Dockerfile linting | `.docker/.hadolint.yaml` |
-| **Trivy** | CVE scanning (OS packages) | `.docker/.trivy.yaml` — CRITICAL+HIGH only |
+| Action | Purpose |
+|--------|---------|
+| `actions/checkout@v4` | Checkout code |
+| `actions/setup-java@v4` | Set up JDK |
+| `actions/setup-go@v5` | Set up Go |
+| `actions/setup-node@v4` | Set up Node.js |
+| `actions/cache@v4` | Cache dependencies |
+| `hadolint/hadolint-action@v3` | Lint Dockerfiles |
+| `golangci/golangci-lint-action@v6` | Go linting |
+| `ibiqlik/action-yamllint@v3` | YAML linting |
+| `streetsidesoftware/cspell-action@v6` | Spell checking |
+| `softprops/action-gh-release@v2` | Create GitHub releases |
+| `aquasecurity/trivy-action@v0` | CVE scanning |
 
-### Java
-| Tool | Purpose |
+---
+
+## Recommended Config Files
+
+These config files should exist in the repo and be referenced by the workflows:
+
+| File | Purpose |
 |------|---------|
-| **Checkstyle 11+** | Code style (line length 140, 4-space indent) |
-| **PMD 7+** | Static analysis / code smells |
-| **SpotBugs 4+** | Bug detection |
-| **OWASP Dependency Check** | CVE scanning for dependencies |
-| **JaCoCo** | Code coverage |
-| **JUnit** | Test runner — XML output required |
+| `.yamllint.yaml` | YAMLlint rules |
+| `.cspell/cspell.yaml` | Spell-check config + custom dictionaries |
+| `.docker/.hadolint.yaml` | Hadolint rules |
+| `.editorconfig` | Editor formatting: LF, 4 spaces, 120 chars |
 
-### JavaScript / TypeScript
-| Tool | Purpose |
-|------|---------|
-| **Prettier** | Code formatting |
-| **ESLint** | Static analysis |
-| **Yarn** | Package manager — `--immutable` lock file required |
-| **Jest** | Tests — `--watchAll=false`, JUnit + Clover XML output |
-| **license-checker** | License allowlist: Apache-2.0, BSD, ISC, MIT, Public Domain |
-
-### PHP
-| Tool | Purpose |
-|------|---------|
-| **PHP-CS-Fixer** | Code style |
-| **Rector** | Modernization / refactor checker |
-| **PHPStan** | Static analysis |
-| **PHPMD** | Mess detection |
-| **PHP_CodeSniffer** | PSR standards |
-| **composer-require-checker** | Detect implicit dependencies |
-| **composer-normalize** | composer.json formatting |
-| **composer audit** | CVE scanning |
-| **PHPUnit** | Tests — JUnit + Clover XML output |
-| **license-checker** | Allowlist: Apache-2.0, BSD-2/3, MIT |
-
-### Python
-| Tool | Purpose |
-|------|---------|
-| **autopep8** | Formatting (aggressive mode) |
-| **isort** | Import sorting |
-| **pylint** | Static analysis |
-| **mypy** | Type checking (`--namespace-packages`) |
-| **Radon** | Cyclomatic complexity (min grade B) |
-| **pydocstyle** | Docstring validation |
-| **PDM** | Package manager — lock file required |
-
-### Terraform
-| Tool | Purpose |
-|------|---------|
-| **tfsec** | Security scanning |
-| **tflint** | Linting |
-| **terraform fmt** | Format validation |
-
----
-
-## Docker CI Standards
-
-- **Semantic versioning pinned** for all base images — no `latest` tags.
-- **OCI labels required** on every Dockerfile:
-  ```dockerfile
-  LABEL org.opencontainers.image.source="..."
-  LABEL org.opencontainers.image.version="..."
-  ```
-- Trusted registry: `public.ecr.aws` (no Docker Hub in CI).
-- Docker socket mounted read-only only: `/var/run/docker.sock:ro`.
-- Hadolint failure threshold: style-level (no bypass allowed).
-- Trivy: OS packages only, CRITICAL + HIGH, unfixed ignored, 5min timeout.
-
----
-
-## Dependency Management
-
-- Lock files **required** for every language: `gradle.lockfile`, `yarn.lock`, `composer.lock`, `pdm.lock`.
-- CVE scans run on schedule (daily) — failures create issues automatically.
-- License checking with allowlist — fail build on unlisted licenses.
-- Outdated dependency checks: advisory only (`allow_failure: true`).
-
----
-
-## Makefile Targets (dev-kit local)
-
-```bash
-make lint              # Run all linting (YAML + XML)
-make lint-yaml         # YAMLlint
-make lint-xml          # XMLlint formatting check
-make cs-fix-xml        # Auto-fix XML formatting
-make spellcheck        # CSpell validation
-make lint-spellcheck-dictionaries  # Validate CSpell dictionaries
-```
+Use the configurations from [nubity/dev-kit](https://github.com/nubity/dev-kit) as a starting point.

@@ -16,13 +16,12 @@ docker compose -f .docker/compose.yaml run --rm cli <command>
 Examples:
 - `npm install` → `docker compose -f .docker/compose.yaml run --rm cli npm install`
 - `./gradlew build` → `docker compose -f .docker/compose.yaml run --rm cli gradle build`
-- `go build ./...` → `docker compose -f .docker/compose.yaml run --rm cli go build ./...`
 
 ## Architecture
 
 - **Clean architecture**: enforce layer separation — controllers → services → repositories.
 - **Dependency injection**: constructor-based only. No global state, no service locators.
-- **No ORM**: raw SQL with parameterized queries. Explicit column mapping to structs/POJOs.
+- **No ORM**: raw SQL with parameterized queries. Explicit column mapping to data objects.
 - **Repository pattern**: one file per entity, one class/struct per repository.
 
 ## Code Quality
@@ -71,20 +70,18 @@ Each language-specific skill defines which mechanism to use (properties file, JS
 ## Code Formatting
 
 - Line endings: **LF only** (Unix). Never CRLF.
-- Max line length: **120 characters** (Java: 140).
+- Max line length: **120 characters**.
 - No trailing whitespace.
 - No tabs — use spaces (except Makefile).
 - Files must end with a single newline.
 - File permissions: **0644 only**.
 - Filenames: alphanumeric + `_/-+.` only.
-- Indentation: 4 spaces (XML, YAML, JSON, Java, Go); 2 spaces (Markdown, HTML).
+- Indentation: 4 spaces. 2 spaces for Markdown and HTML.
 
 ## Safety Patterns
 
 - **Yoda conditions**: place constants on the left side of comparisons.
-  - Java: `if (null == variable)` / `"constant".equals(variable)`
-  - Go/TS: prefer explicit null checks over implicit truthy/falsy.
-- **Explicit member access**: always use `this.` (Java/JS/TS) or the named receiver (Go).
+- **Explicit member access**: always use `this.` or the named receiver to access fields and methods.
 
 ## Security
 
@@ -104,16 +101,15 @@ Each language-specific skill defines which mechanism to use (properties file, JS
 ## Database
 
 - Raw SQL only — no ORM.
-- Parameterized queries (`?` / `$1`, `$2`).
+- Always use driver-level parameterized queries — no string concatenation.
 - Explicit column listing — no `SELECT *`.
 - `CASCADE` deletes only when a parent entity truly owns its children.
 
 ## Testing
 
-- Tests run against real dependencies (real DB in Docker) — do not mock infrastructure.
-- Unit tests may mock only internal interfaces, not databases or external services.
+- Tests run against real dependencies (real DB in Docker) — **prefer not mocking the database**.
+- Mock the database only when strictly necessary and there is no viable alternative.
 - Test file location mirrors source structure.
-- Do not use `t.Skip()` or equivalent to silence failing tests.
 
 ## Docker
 
