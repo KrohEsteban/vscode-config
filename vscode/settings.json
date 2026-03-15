@@ -1,54 +1,43 @@
 {
-  // Neovim Extension Settings for Cursor
+  // --- Neovim integration ---
   "vscode-neovim.neovimInitVimPaths.linux": "~/.config/nvim/init.lua",
-
-  // Use Neovim for all editing
+  "vscode-neovim.neovimExecutablePaths.linux": "nvim",
   "vscode-neovim.useCtrlKeys": true,
   "vscode-neovim.useCtrlKeysInsertMode": false,
-
-  // Neovim path (adjust if needed)
-  "vscode-neovim.neovimExecutablePaths.linux": "nvim",
-
-  // Prevent conflicts with Cursor keybindings
+  "vscode-neovim.useWsl": false,
+  "vscode-neovim.neovimUseFork": true,
   "vscode-neovim.highlightGroups.highlights": {
     "Normal": { "background": null },
     "Cursor": { "background": null }
   },
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
 
-  // Clipboard settings (important for integration)
-  "vscode-neovim.useWsl": false,
-
-  // Performance settings
-  "vscode-neovim.neovimUseFork": true,
-
-  // Editor settings that work well with Neovim
+  // --- Editor ---
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "off",
   "editor.smoothScrolling": false,
-  "editor.rulers": [120],
-
-  // Eliminar espacios en blanco al final de las líneas al guardar
-  "files.trimTrailingWhitespace": true,
-
-  // Insertar nueva línea al final del archivo si no existe
-  "files.insertFinalNewline": true,
-
-  // Configuración adicional para editor
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
   "editor.trimAutoWhitespace": true,
-
-  // Window settings
-  "window.commandCenter": true,
-
-  // Disable some Cursor features that might conflict
+  "editor.rulers": [120, 140],
   "editor.wordBasedSuggestions": "off",
   "editor.quickSuggestions": {
     "other": false,
     "comments": false,
     "strings": false
   },
-  "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
-  },
+
+  // --- Files ---
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": false,
+
+  // --- Window ---
+  "window.commandCenter": true,
+
+  // --- Misc ---
   "makefile.configureOnOpen": false
 }
-
