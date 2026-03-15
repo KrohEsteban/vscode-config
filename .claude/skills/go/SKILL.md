@@ -39,16 +39,21 @@ internal/
 
 ### Error Handling
 - Always return explicit errors as second return value.
-- Wrap with context:
+- Wrap with context: `return nil, fmt.Errorf("GetByID: %w", err)`
+- Define domain errors as named variables in `internal/errors/errors.go` — never use ad-hoc `errors.New("string")` inline:
   ```go
-  return nil, fmt.Errorf("GetByID: %w", err)
+  var (
+      ErrNotFound    = errors.New("not found")
+      ErrAccessDenied = errors.New("access denied")
+      ErrInvalidInput = errors.New("invalid input")
+  )
   ```
-- HTTP errors respond with JSON:
-  ```go
-  c.JSON(http.StatusBadRequest, gin.H{"error": "message"})
-  return
-  ```
+- HTTP layer translates domain errors to status codes via a centralized error middleware — never hardcode `http.Status*` responses scattered across handlers.
 - Always `return` after responding in a handler.
+
+### Authorization
+- Authorization logic must live in middleware or a dedicated `internal/auth/` package — never inside handlers.
+- Handlers extract identity from context; they do not make authorization decisions.
 
 ### Dependency Injection
 - Constructor functions: `NewXxxService(deps...) *XxxService`.
